@@ -4,6 +4,11 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Table,
   TableBody,
   TableCell,
@@ -24,7 +29,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import GetAppIcon from '@material-ui/icons/GetApp';
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 const useStyles = makeStyles((theme) => ({
   ganado: {
@@ -55,6 +60,8 @@ const App = () => {
   const [rows, setRows] = useState(
     JSON.parse(localStorage.getItem("rows")) || []
   );
+  const [open, setOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
   const [bankTotal, setBankTotal] = useState(0);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editData, setEditData] = useState({
@@ -90,19 +97,21 @@ const App = () => {
   };
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      Tesseract.recognize(file, "eng", {
-        logger: (info) => console.log(info),
-      }).then(({ data: { text } }) => {
-        const info = extractInfo(text);
-        setRows((prevRows) => [...prevRows, info]);
-        const newBankTotal =
-          bankTotal +
-          parseInt(info.gananciaTotal) -
-          parseInt(info.apuestaTotal);
-        setBankTotal(newBankTotal);
-      });
+    const files = e.target.files;
+    if (files.length > 0) {
+      for (let file of files) {
+        Tesseract.recognize(file, "eng", {
+          logger: (info) => console.log(info),
+        }).then(({ data: { text } }) => {
+          const info = extractInfo(text);
+          setRows((prevRows) => [...prevRows, info]);
+          const newBankTotal =
+            bankTotal +
+            parseInt(info.gananciaTotal) -
+            parseInt(info.apuestaTotal);
+          setBankTotal(newBankTotal);
+        });
+      }
     }
   };
 
@@ -141,6 +150,21 @@ const App = () => {
     setEditData({ ...editData, [name]: value });
   };
 
+  const handleOpen = (index) => {
+    setDeleteIndex(index);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(deleteIndex);
+    handleClose();
+  };
+
   return (
     <div>
       <AppBar position="static" className={classes.root}>
@@ -156,11 +180,13 @@ const App = () => {
                 id="contained-button-file"
                 type="file"
                 onChange={handleImageUpload}
+                multiple
               />
+
               <label htmlFor="contained-button-file">
                 <Button
                   variant="contained"
-                  color="secondary" 
+                  color="secondary"
                   component="span"
                   startIcon={<CloudUploadIcon />}
                   className={classes.button}
@@ -171,8 +197,8 @@ const App = () => {
             </Grid>
             <Grid item>
               <Button
-                variant="contained" 
-                color="secondary" 
+                variant="contained"
+                color="secondary"
                 onClick={handleExcelExport}
                 startIcon={<GetAppIcon />}
                 className={classes.button}
@@ -282,7 +308,7 @@ const App = () => {
                   )}
                   <IconButton
                     color="secondary"
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleOpen(index)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -292,6 +318,20 @@ const App = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{"¿Estás seguro?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>¿Estás seguro de eliminar?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
