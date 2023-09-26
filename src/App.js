@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Tesseract from "tesseract.js";
 import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Table,
   TableBody,
@@ -15,18 +17,18 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton
+  IconButton,
 } from "@material-ui/core";
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import SaveIcon from "@material-ui/icons/Save";
 
 const useStyles = makeStyles((theme) => ({
   ganado: {
-    backgroundColor: 'lightgreen',
+    backgroundColor: "lightgreen",
   },
   perdido: {
-    backgroundColor: 'salmon',
+    backgroundColor: "salmon",
   },
   root: {
     marginBottom: theme.spacing(3),
@@ -35,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   fileInput: {
-    display: 'none',
+    display: "none",
   },
 }));
 
@@ -60,12 +62,12 @@ const App = () => {
 
   const getEstadoClass = (estado) => {
     switch (estado) {
-      case 'Ganada':
+      case "Ganada":
         return classes.ganado;
-      case 'Perdida':
+      case "Perdida":
         return classes.perdido;
       default:
-        return '';
+        return "";
     }
   };
 
@@ -87,10 +89,18 @@ const App = () => {
         const info = extractInfo(text);
         setRows((prevRows) => [...prevRows, info]);
         const newBankTotal =
-          bankTotal + parseInt(info.gananciaTotal) - parseInt(info.apuestaTotal);
+          bankTotal +
+          parseInt(info.gananciaTotal) -
+          parseInt(info.apuestaTotal);
         setBankTotal(newBankTotal);
       });
     }
+  };
+
+  const handlePDFExport = () => {
+    const doc = new jsPDF();
+    autoTable(doc, { html: "#ticket-table" });
+    doc.save("tickets.pdf");
   };
 
   const handleExcelExport = () => {
@@ -141,11 +151,16 @@ const App = () => {
               Subir Imagen
             </Button>
           </label>
-          <Button color="inherit" onClick={handleExcelExport}>Exportar como Excel</Button>
+          <Button color="inherit" onClick={handleExcelExport}>
+            Exportar como Excel
+          </Button>
+          <Button color="inherit" onClick={handlePDFExport}>
+            Exportar como PDF
+          </Button>
         </Toolbar>
       </AppBar>
       <TableContainer component={Paper}>
-        <Table>
+        <Table id="ticket-table">
           <TableHead>
             <TableRow>
               <TableCell>Nombre</TableCell>
@@ -216,15 +231,24 @@ const App = () => {
                 </TableCell>
                 <TableCell>
                   {editingIndex === index ? (
-                    <IconButton color="primary" onClick={() => handleSave(index)}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleSave(index)}
+                    >
                       <SaveIcon />
                     </IconButton>
                   ) : (
-                    <IconButton color="primary" onClick={() => handleEdit(index)}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEdit(index)}
+                    >
                       <EditIcon />
                     </IconButton>
                   )}
-                  <IconButton color="secondary" onClick={() => handleDelete(index)}>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDelete(index)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
