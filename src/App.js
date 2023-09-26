@@ -18,10 +18,13 @@ import {
   Toolbar,
   Typography,
   IconButton,
+  Grid,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme) => ({
   ganado: {
@@ -38,6 +41,12 @@ const useStyles = makeStyles((theme) => ({
   },
   fileInput: {
     display: "none",
+  },
+  button: {
+    margin: theme.spacing(1),
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "0.7rem",
+    },
   },
 }));
 
@@ -139,24 +148,50 @@ const App = () => {
           <Typography variant="h6" className={classes.title}>
             App de Tickets
           </Typography>
-          <input
-            accept="image/*"
-            className={classes.fileInput}
-            id="contained-button-file"
-            type="file"
-            onChange={handleImageUpload}
-          />
-          <label htmlFor="contained-button-file">
-            <Button variant="contained" color="default" component="span">
-              Subir Imagen
-            </Button>
-          </label>
-          <Button color="inherit" onClick={handleExcelExport}>
-            Exportar como Excel
-          </Button>
-          <Button color="inherit" onClick={handlePDFExport}>
-            Exportar como PDF
-          </Button>
+          <Grid container spacing={1} alignItems="center">
+            <Grid item>
+              <input
+                accept="image/*"
+                className={classes.fileInput}
+                id="contained-button-file"
+                type="file"
+                onChange={handleImageUpload}
+              />
+              <label htmlFor="contained-button-file">
+                <Button
+                  variant="contained"
+                  color="secondary" 
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  className={classes.button}
+                >
+                  Subir Imagen
+                </Button>
+              </label>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained" 
+                color="secondary" 
+                onClick={handleExcelExport}
+                startIcon={<GetAppIcon />}
+                className={classes.button}
+              >
+                Exportar como Excel
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handlePDFExport}
+                startIcon={<GetAppIcon />}
+                className={classes.button}
+              >
+                Exportar como PDF
+              </Button>
+            </Grid>
+          </Grid>
         </Toolbar>
       </AppBar>
       <TableContainer component={Paper}>
