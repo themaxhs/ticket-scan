@@ -62,7 +62,7 @@ const App = () => {
   );
   const [open, setOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
-  const [bankTotal, setBankTotal] = useState(0);
+  const [bankTotal, setBankTotal] = useState(2000);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editData, setEditData] = useState({
     estado: "",
@@ -91,8 +91,8 @@ const App = () => {
     const lines = text.split("\n");
     const estado = lines[0].split(" ")[1];
     const nombre = lines[4];
-    const apuestaTotal = parseInt(lines[lines.length - 3].split(": ")[1], 10);
-    const gananciaTotal = parseInt(lines[lines.length - 2].split(": ")[1], 10);
+    const apuestaTotal = parseFloat(lines[lines.length - 3].split(": ")[1]);
+    const gananciaTotal = parseFloat(lines[lines.length - 2].split(": ")[1]);
     return { estado, nombre, apuestaTotal, gananciaTotal };
   };
 
@@ -140,9 +140,14 @@ const App = () => {
 
   const handleSave = (index) => {
     const newRows = [...rows];
-    newRows[index] = editData;
+    const oldGananciaTotal = parseFloat(newRows[index].gananciaTotal);
+    newRows[index] = { ...editData };
+    const newGananciaTotal = parseFloat(editData.gananciaTotal);
     setRows(newRows);
     setEditingIndex(null);
+    setBankTotal(
+      (prevBankTotal) => prevBankTotal - oldGananciaTotal + newGananciaTotal
+    );
   };
 
   const handleInputChange = (e) => {
